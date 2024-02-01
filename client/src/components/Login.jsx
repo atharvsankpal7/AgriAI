@@ -176,6 +176,8 @@ const Login = () => {
                         >
                             Login
                         </button>
+                        <hr />
+
                         <p className="small fw-bold mt-2 pt-1 mb-2">
                             Don't have an account?{" "}
                             <Link to="/signup" className="link link-info">

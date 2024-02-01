@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,Link } from "react-router-dom";
 import { Modal, message } from "antd";
 const Signup = () => {
     const apiUrl = "http://localhost:5000/api/";
@@ -113,22 +113,21 @@ const Signup = () => {
 
     return (
         <form onSubmit={handleFormSubmit}>
-            <div className="container-fluid p-4">
+            <div className="container p-4">
                 <div className="row">
-                    <div className="col-md-6 text-center text-md-start d-flex flex-column justify-content-center">
-                        <div className="h-1 my-5 display-3 fw-bold ls-tight px-3">
+                    <div className="col-md-6 text-center ">
+                        <div className=" my-5 h1 fw-bold ">
                             SmartAgroScan <br />
                             <span
-                                className="  text-primary"
-                                style={{ fontSize: 2.65 + "rem" }}
+                                className="w-100 text-primary h2"
                             >
                                 Revolutionizing Plant Health with
-                                AI-Powered Diagnosis
+                                AI Powered Diagnosis
                             </span>
                         </div>
 
                         <p
-                            className="px-3"
+                            className="px-3 "
                             style={{ color: "hsl(217, 10%, 50.8%)" }}
                         >
                             SmartAgroScan combines AI and Machine Learning to
@@ -219,6 +218,9 @@ const Signup = () => {
                                 >
                                     Sign up
                                 </button>
+                                <hr />
+                                    <b>Already Have An Account? <Link to="/login" className=" link-info">Login</Link></b>
+                                
                             </div>
                         </div>
                     </div>
