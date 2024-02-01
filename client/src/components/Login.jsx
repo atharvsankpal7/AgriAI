@@ -20,6 +20,7 @@ const Login = () => {
         const validationErrors = validateForm(formData);
         if (Object.keys(validationErrors).length !== 0) {
             setErrors(validationErrors);
+            setLoginLoading(false);
             return;
         }
 
@@ -176,25 +177,24 @@ const Login = () => {
                         )}
                     </div>
 
-                    <div className="text-center text-md-start mt-4 pt-2 w-25">
+                    <div className="text-center mt-4 pt-2 w-25">
                         <Spin spinning={loginLoading}>
                             <button
-                                className="w-100 px-5 btn btn-info"
+                                className="w-100 btn btn-info"
                                 type="submit"
                                 disabled={loginLoading}
                             >
                                 Login
                             </button>
                         </Spin>
-                        <hr />
-
-                        <p className="small fw-bold mt-2 pt-1 mb-2">
-                            Don't have an account?{" "}
-                            <Link to="/signup" className="link link-info">
-                                Register
-                            </Link>
-                        </p>
                     </div>
+                    <hr />
+                    <p className="small fw-bold mt-2 pt-1 mb-2">
+                        Don't have an account?{" "}
+                        <Link to="/signup" className="link link-info">
+                            Register
+                        </Link>
+                    </p>
                 </form>
             </div>
         </div>
