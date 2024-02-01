@@ -1,3 +1,7 @@
+/**
+ * Connects to MongoDB database, configures Express app,
+ * sets up routes and starts listening for requests on port 5000
+ */
 const connectToMongo = require("./db");
 const express = require("express");
 const cors = require("cors");

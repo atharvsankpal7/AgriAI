@@ -18,6 +18,14 @@ const Home = () => {
     const [imageString, setImageString] = useState(null);
     const [uploadingStatus, setUploadingStatus] = useState(false);
 
+    /**
+     * Handles image input change to convert image to base64 string
+     * Gets image file from input event
+     * Sets state with new image file
+     * Uses FileReader to read image as data URL
+     * Draws image to canvas to get base64 string
+     * Sets state with base64 string representation of image
+     */
     const handleInputImageChange = (e) => {
         let newImage = e.target.files[0];
         setSelectedImage(newImage);
@@ -92,6 +100,10 @@ const Home = () => {
         }
     };
 
+    /**
+     * Uploads the base64-encoded image string to the server.
+     * Shows loading indicator, handles errors, updates notes state on success.
+     */
     const uploadImage = async () => {
         setUploadingStatus(true);
         try {
@@ -135,6 +147,7 @@ const Home = () => {
             console.error("Error Uploading notes:", error);
         }
     };
+   
     return (
         <div className=" pt-3 pb-3 ">
             {contextHolder}

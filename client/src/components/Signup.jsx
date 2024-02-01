@@ -14,6 +14,15 @@ const Signup = () => {
     const [errors, setErrors] = useState({});
     const [signupLoading, setSignupLoading] = useState(false);
 
+    /**
+     * Handles submitting the signup form.
+     *
+     * Validates form data client-side, then makes request to backend API
+     * to create a new user. Handles various response codes from the API.
+     * Shows success/error messages to user as needed.
+     *
+     * Redirects to homepage after successful signup.
+     */
     const handleFormSubmit = async (event) => {
         event.preventDefault();
 

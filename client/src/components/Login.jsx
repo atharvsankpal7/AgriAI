@@ -13,6 +13,12 @@ const Login = () => {
 
     const navigate = useNavigate();
 
+    /**
+     * Handles user login when they click the login button.
+     * Validates form data, makes API call to backend to authenticate,
+     * stores auth token on success, redirects to homepage,
+     * and handles various error cases.
+     */
     const handleLoginClick = async (e) => {
         e.preventDefault();
         setLoginLoading(true);

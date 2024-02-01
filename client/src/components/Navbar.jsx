@@ -4,6 +4,10 @@ import { Modal } from "antd";
 const Navbar = () => {
     let location = useLocation();
     let navigate = useNavigate();
+    /**
+     * Logs the user out by removing the token from localStorage,
+     * redirecting to the login page, and showing a success modal.
+     */
     const handleLogOutClick = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("username");
