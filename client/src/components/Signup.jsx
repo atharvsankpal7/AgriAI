@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useNavigate,Link } from "react-router-dom";
-import { Modal, message } from "antd";
+import { useNavigate, Link } from "react-router-dom";
+import { Modal, message, Spin } from "antd";
 const Signup = () => {
     const apiUrl = "http://localhost:5000/api/";
     const navigate = useNavigate();
@@ -12,13 +12,18 @@ const Signup = () => {
     });
 
     const [errors, setErrors] = useState({});
+    const [signupLoading, setSignupLoading] = useState(false);
 
     const handleFormSubmit = async (event) => {
         event.preventDefault();
 
+        setSignupLoading(true);
+
+        // Client side verification
         const validationErrors = validateForm(formData);
         if (Object.keys(validationErrors).length !== 0) {
             setErrors(validationErrors);
+            setSignupLoading(false);
             return;
         }
 
@@ -35,22 +40,27 @@ const Signup = () => {
                 }),
             });
 
+            // If email-id is already in use
             if (response.status === 409) {
                 Modal.error({
                     title: "Error",
                     content: "Use different email-id please",
                 });
+                setSignupLoading(false);
                 return;
             }
 
+            // If the form data is in invalid format (checked by server)
             if (!response.ok) {
                 Modal.error({
                     title: "Error",
                     content: "Invalid Form Data",
                 });
+                setSignupLoading(false);
                 return;
             }
 
+            // User account creation Successful
             const data = await response.json();
 
             localStorage.setItem("token", data.authToken);
@@ -60,12 +70,14 @@ const Signup = () => {
                 title: "Success",
                 content: "User created successfully",
             });
+            setSignupLoading(false);
         } catch (error) {
             Modal.error({
                 title: "Error",
                 content:
                     "Error connecting to backend please check internet connection OR try after sometime",
             });
+            setSignupLoading(false);
             console.error("Error during login request:", error);
         }
     };
@@ -118,11 +130,9 @@ const Signup = () => {
                     <div className="col-md-6 text-center ">
                         <div className=" my-5 h1 fw-bold ">
                             SmartAgroScan <br />
-                            <span
-                                className="w-100 text-primary h2"
-                            >
-                                Revolutionizing Plant Health with
-                                AI Powered Diagnosis
+                            <span className="w-100 text-primary h2">
+                                Revolutionizing Plant Health with AI Powered
+                                Diagnosis
                             </span>
                         </div>
 
@@ -212,15 +222,23 @@ const Signup = () => {
                                     )}
                                 </div>
 
-                                <button
-                                    className="w-100 mb-4 btn btn-primary"
-                                    type="submit"
-                                >
-                                    Sign up
-                                </button>
+                                <Spin spinning={signupLoading}>
+                                    {" "}
+                                    <button
+                                        className="w-100 btn btn-primary"
+                                        type="submit"
+                                        disabled={signupLoading}
+                                    >
+                                        Sign up
+                                    </button>
+                                </Spin>
                                 <hr />
-                                    <b>Already Have An Account? <Link to="/login" className=" link-info">Login</Link></b>
-                                
+                                <b>
+                                    Already Have An Account?{" "}
+                                    <Link to="/login" className=" link-info">
+                                        Login
+                                    </Link>
+                                </b>
                             </div>
                         </div>
                     </div>

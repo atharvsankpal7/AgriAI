@@ -16,8 +16,7 @@ const Home = () => {
     const { notes, setNotes } = noteContext;
     const [selectedImage, setSelectedImage] = useState(null);
     const [imageString, setImageString] = useState(null);
-    const [uploadingStatus, setUploadingStatus] = useState(false)
-
+    const [uploadingStatus, setUploadingStatus] = useState(false);
 
     const handleInputImageChange = (e) => {
         let newImage = e.target.files[0];
@@ -56,8 +55,7 @@ const Home = () => {
             };
             // Read the selected image as a data URL using FileReader
             reader.readAsDataURL(newImage);
-        } catch (error) {
-        }
+        } catch (error) {}
     };
 
     // if not logged in then navigate to the login page
@@ -171,20 +169,24 @@ const Home = () => {
                                 <img
                                     src={URL.createObjectURL(selectedImage)}
                                     alt="selectedImage"
-                                    className=" w-100 h-100"
+                                    className="w-100 h-100"
                                 />
                             ) : (
-                                <span>image</span>
+                                <img
+                                    src="upload.png"
+                                    alt="Browse Images"
+                                    className="w-50 h-100"
+                                />
                             )}
                         </label>
                     </div>
                     <button
-                        className="btn btn-light w-100 my-3  "
+                        className="btn btn-outline-dark border-2 w-100 my-3 text-dark-emphasis fs-4"
                         onClick={uploadImage}
                         disabled={!selectedImage || uploadingStatus}
                     >
                         Upload Image
-                    </button>{" "}
+                    </button>
                 </div>
             </div>
         </div>
