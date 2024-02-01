@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap');
+
+
+
+.image-upload-container {
+    /* background-color: aliceblue; */
+    height: 75vh;
+    font-family: 'Poppins', sans-serif;
+    width: 25vw;
+    min-width: 200px;
+    min-height: 400px;
+    max-width: 450px;
+    padding: 2%;
+    /* background-color: rgb(140, 117, 225); */
+    border-radius: 10px;
+    max-height: 500px;
+    width: 100%;
+}
+
+.img {
+    width: 100%;
+    border: 2px rgb(103, 97, 97) dashed;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 50%;
+    margin-bottom: 10px;
+
+}
+
+
+label {
+    cursor: pointer;
+
+}
+
+
+
+.download {
+    width: 100%;
+    margin: 25px 0;
+    height: 35px;
+    /* color: white; */
+    /* background-color: rgb(140, 117, 225); */
+    border: 0;
+    align-self: flex-end;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: box-shadow .3s ease-in-out;
+    padding: 10px;
+}
+
+.note-container {
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    gap: 10px;
+    padding: 10px;
+    justify-items: center;
+}
+
+@media screen and (max-width : 1300px) {
+    .note-container {
+        grid-template-columns: auto auto auto;
+    }
+}
+
+@media screen and (max-width : 1000px) {
+    .note-container {
+        grid-template-columns: auto auto;
+    }
+}
+
+@media screen and (max-width : 750px) {
+    .note-container {
+        grid-template-columns: auto;
+    }
+}
