@@ -1,5 +1,6 @@
 import base64
 import io
+import socket
 from flask import Flask, request, render_template
 from keras.applications.mobilenet import preprocess_input
 from keras.models import load_model
@@ -39,7 +40,6 @@ def f1_m(y_true, y_pred):
 
 
 def read_image(image1):
-    # image2 = tf.io.decode_jpeg(image1, channels=3)
     image2 = tf.image.convert_image_dtype(image1, tf.float32)
     image3 = tf.image.resize_with_pad(image2, target_height=256, target_width=256)
     return image3
@@ -95,13 +95,8 @@ def integral_approximation(gradients):
 
 
 def integrated_gradients(baseline, image, target_class_idx, m_steps=30, batch_size=8):
-    # Generate alphas.
     alphas = tf.linspace(start=0.0, stop=1.0, num=m_steps + 1)
-
-    # Collect gradients.
     gradient_batches = []
-
-    # Iterate alphas range and batch computation for speed, memory efficiency, and scaling to larger m_steps.
     for alpha in tf.range(0, len(alphas), batch_size):
         from_ = alpha
         to = tf.minimum(from_ + batch_size, len(alphas))
@@ -110,24 +105,15 @@ def integrated_gradients(baseline, image, target_class_idx, m_steps=30, batch_si
         gradient_batch = one_batch(baseline, image, alpha_batch, target_class_idx)
         gradient_batches.append(gradient_batch)
 
-    # Concatenate path gradients together row-wise into single tensor.
     total_gradients = tf.concat(gradient_batches, axis=0)
-
-    # Integral approximation through averaging gradients.
     avg_gradients = integral_approximation(gradients=total_gradients)
-
-    # Scale integrated gradients with respect to input.
     integrated_gradients = (image - baseline) * avg_gradients
-
     return integrated_gradients
 
 
 @tf.function
 def one_batch(baseline, image, alpha_batch, target_class_idx):
-    # Generate interpolated inputs between baseline and input.
     interpolated_path_input_batch = interpolate_images(baseline=baseline, image=image, alphas=alpha_batch)
-
-    # Compute gradients between model outputs and interpolated inputs.
     gradient_batch = compute_gradients(images=interpolated_path_input_batch, target_class_idx=target_class_idx)
     return gradient_batch
 
@@ -157,29 +143,19 @@ def plot_img_attributions_and_return(baseline, image, target_class_idx, m_steps=
     axs[1, 1].imshow(image, alpha=overlay_alpha)
     axs[1, 1].axis('off')
 
-    # Convert the images to base64-encoded strings
-
-    # for i, ax in enumerate(axs.flat):
-    #     buffer = io.BytesIO()
-    #     plt.savefig(buffer, format='png')
-    #     buffer.seek(0)
-    #     image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
-    #     images_base64[f'image_{i+1}'] = image_base64
     buffer = io.BytesIO()
     plt.savefig(buffer, format='png')
     buffer.seek(0)
     image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
     images_base64 = image_base64
 
-    plt.close()  # Close the figure to avoid displaying the plot
+    plt.close()  
 
     return images_base64
 
 @app.route("/predict", methods=["POST"])
 def predict():
     print(1)
-    # image_file = request.files['image']
-    # image = Image.open(image_file)
     base64_image = request.form['baseImage']
 
     image_data = base64.b64decode(base64_image)
@@ -256,6 +232,18 @@ def predict():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
+def find_available_port():
+    """Find an available port starting from a base port."""
+    base_port = 4000 
+    while True:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(('localhost', base_port))
+                return base_port
+        except OSError:
+            base_port += 1
+
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=4000)
+    port = find_available_port()
+    app.run(host='localhost', port=port)
