@@ -42,35 +42,51 @@ router.get("/getallnotesAdmin", fetchuser, async (req, res) => {
  *
  * Returns the saved note document.
  */
-router.post("/addnote", fetchuser, async (req, res) => {
-    try {
-        const newNote = new Notes({
-            user: req.user.id,
-            baseImage: req.body.baseImage,
-            title: req.user.id,
-            date: Date.now(),
-        });
+router.post(
+    "/addnote",
+    fetchuser,
+    [
+        body("baseImage", "Please enter the baseImage")
+            .trim()
+            .isLength({ min: 1 }),
+    ],
+    async (req, res) => {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                res.status(400).json({ errors });
+                return; // Important: Add a return statement to exit the function here
+            }
+            let base64Image = req.body.baseImage.split(",")[1];
+            let formData = new FormData();
+            let img;
+            let newNote;
+            formData.append("baseImage", base64Image);
+            await fetch("http://localhost:4000/predict", {
+                method: "POST",
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    let base64Image = data.prediction.imagefile;
+                    img = "data:image/png;base64," + base64Image;
+                    newNote = new Notes({
+                        user: req.user.id,
+                        baseImage: img,
+                        date: Date.now(),
+                        title: data.prediction.plantLabel
+                    });
 
-        const savedNote = await newNote.save();
+                })
 
-        // when Machine Learning model is up running, uncomment the below code
-        // let base64Image = req.body.baseImage.split(",")[1];
-        // let response = await fetch("http://192.168.29.106:4000/predict", {
-        //     method: "POST",
-        //     body: JSON.stringify({
-        //         baseImage: base64Image,
-        //         id: savedNote._id,
-        //     }),
-        // });
-        // let result = await response.json();
-        // newNote.maskedImage = result.predict.maskedImage;
-        // newNote.description = result.predict.description;
-        res.send(savedNote);
-    } catch (e) {
-        console.log("Error in addnote", e);
-        res.status(500).send("database connectivity error");
+
+            const savedNote = await newNote.save();
+            res.send(savedNote);
+        } catch (e) {
+            res.status(500).send("database connectivity error");
+        }
     }
-});
+);
 
 // endpoint --> /api/notes/updatenote. Login required
 /**
