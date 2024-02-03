@@ -102,7 +102,7 @@ router.post(
             const authToken = jwt.sign(data, JWT_SECRET);
 
             // user login success
-            response.json({ authToken, username });
+            response.json({ authToken, username,isAdmin:user.isAdmin });
         } catch (err) {
             response.status(500).send("Database connection failed");
         }

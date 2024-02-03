@@ -22,6 +22,10 @@ const Chatbot = () => {
         dangerouslyAllowBrowser: true,
     });
 
+    /**
+     * Sends the user's message text to the OpenAI API to generate a response.
+     * Handles calling the chat completions endpoint and returning the bot response.
+     */
     const askOpenAI = async (text) => {
         console.log(text);
         try {
@@ -47,6 +51,17 @@ const Chatbot = () => {
         }
     };
 
+    /**
+     * Handles sending a new message to the chatbot and updating the message list with the user's message and the bot's response.
+     *
+     * When the form is submitted:
+     * - Prevent default form submission behavior
+     * - Check that the message is not just whitespace
+     * - Add the new message to the message state as a user message
+     * - Call askOpenAI() to get the bot's response for the message
+     * - Add the bot response to the message state
+     * - Clear the input field
+     */
     const handleSendMessage = async (e) => {
         e.preventDefault();
 

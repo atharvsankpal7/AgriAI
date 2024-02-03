@@ -1,22 +1,27 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Modal } from "antd";
 const Navbar = () => {
     let location = useLocation();
+    let navigate = useNavigate();
+    /**
+     * Logs the user out by removing the token from localStorage,
+     * redirecting to the login page, and showing a success modal.
+     */
     const handleLogOutClick = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("username");
+        navigate("/login");
         Modal.success({
             title: "Success",
             content: "You have successfully logged out",
         });
-        location.pathname("/login");
     };
     return (
         <nav className="navbar navbar-expand-lg bg-body-tertiary ">
             <div className="container-fluid">
                 <Link className="navbar-brand" to="/about">
-                    Company
+                    SmartAgriScan
                 </Link>
                 <div
                     className="collapse navbar-collapse"
@@ -83,25 +88,26 @@ const Navbar = () => {
                             <></>
                         )}
                     </ul>
-                    {!localStorage.getItem("token") ? (
+                    {localStorage.getItem("token") ? (
+                        <form>
+                            <button
+                                className="btn btn-danger"
+                                onClick={handleLogOutClick}
+                                type="button"
+                            >
+                                Log Out
+                            </button>
+                        </form>
+                    ) : (
                         <form className="d-flex gap-2">
                             <Link
-                                className="  btn btn-outline-light "
+                                className="btn btn-outline-light"
                                 to="/signup"
                             >
                                 Sign-Up
                             </Link>
-                            <Link className=" btn btn-info " to="/login">
+                            <Link className="btn btn-info" to="/login">
                                 Login
-                            </Link>
-                        </form>
-                    ) : (
-                        <form>
-                            <Link
-                                className=" btn btn-danger"
-                                onClick={handleLogOutClick}
-                            >
-                                Log Out
                             </Link>
                         </form>
                     )}
