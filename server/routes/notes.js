@@ -1,8 +1,8 @@
 const express = require("express");
+const User = require("../models/User");
 const router = express.Router();
 const fetchuser = require("../middleware/fetchuser");
 const Notes = require("../models/Notes");
-const { body, validationResult } = require("express-validator");
 
 // endpoint --> /api/notes/getallnotes. Login required
 router.get("/getallnotes", fetchuser, async (req, res) => {
@@ -11,6 +11,24 @@ router.get("/getallnotes", fetchuser, async (req, res) => {
         res.json(notes);
     } catch (e) {
         console.log("Error in getallnotes", e);
+        res.status(500).json({ error: "Server error" });
+    }
+});
+
+router.get("/getallnotesAdmin", fetchuser, async (req, res) => {
+    try {
+        let userId = req.user.id;
+        const user = await User.findById(userId);
+        if (!user.isAdmin) {
+            res.status(401).json({ error: "Unauthenticated user" });
+            return;
+        }
+        const notes = await Notes.find({
+            description: { $exists: false },
+        }).lean();
+        res.json(notes);
+    } catch (e) {
+        console.log(e);
         res.status(500).json({ error: "Server error" });
     }
 });
@@ -67,18 +85,15 @@ router.put("/updatenote/:id", async (req, res) => {
     try {
         const { description, tag, maskedImage } = req.body;
         const newNote = {};
-
         // check for updated parameters
         if (description) newNote.description = description;
         if (tag) newNote.tag = tag;
         if (maskedImage) newNote.maskedImage = maskedImage;
-
         // Find the note by id provided in the url
         let note = await Notes.findById(req.params.id);
         if (!note) {
-            res.status(400).send("Note not found");
+            res.status(404).send("Note not found");
         }
-
         // Updation success
         //findByIdAndUpdate(note_to_be_updated, what_should_be_updated,if_new_parameters_are_updated_add_them)
         note = await Notes.findByIdAndUpdate(req.params.id, newNote, {
@@ -87,7 +102,7 @@ router.put("/updatenote/:id", async (req, res) => {
         res.json(note);
     } catch (e) {
         res.status(500).send("database connectivity error");
-        console.log("database connectivity error");
+        console.log(e);
     }
 });
 

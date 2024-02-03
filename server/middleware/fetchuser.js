@@ -1,18 +1,21 @@
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = "ThisIsSecretKeyForToken";
 
-const fetchuser = (req, res, nextFunction) => {
+const fetchUser = (req, res, nextFunction) => {
     const token = req.header("auth-token");
     if (!token) {
         res.status(401).send("Unauthorized access");
+        return;
     }
+
     try {
-        const data = jwt.verify(token, JWT_SECRET);
-        req.user = data.user;
+        // Decode the token and extract user information
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded.user;
         nextFunction();
     } catch (err) {
         res.status(401).send("Unauthorized access");
     }
 };
 
-module.exports = fetchuser;
+module.exports = fetchUser;

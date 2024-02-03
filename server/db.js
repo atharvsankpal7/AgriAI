@@ -13,6 +13,7 @@ async function connectToMongo() {
     } catch (error) {
         console.error(error);
     }
+    
 }
 
 module.exports = connectToMongo;

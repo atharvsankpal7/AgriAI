@@ -81,6 +81,15 @@ const Login = () => {
             setLoginLoading(false);
             navigate("/");
             message.success({ title: "Success", content: "Login Successful" });
+            // if user is admin
+            if (data.isAdmin) {
+                localStorage.setItem("isAdmin", data.isAdmin);
+                message.success({
+                    title: "Success",
+                    content: "Admin Login Successful",
+                });
+                navigate("/AdminPage");
+            }
         } catch (error) {
             Modal.error({
                 title: "Error",
@@ -136,7 +145,7 @@ const Login = () => {
                     <img
                         src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
                         className="img-fluid"
-                        alt="Sample image"
+                        alt="Company "
                     />
                 </div>
                 <form

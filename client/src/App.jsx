@@ -15,6 +15,7 @@ const App = () => {
     );
     const UploadHistory = lazy(() => import("./components/UploadHistory"));
     const PageNotFound = lazy(() => import("./components/PageNotFound"));
+    const AdminPage = lazy(() => import("./components/AdminPage"));
 
     // Components
     return (
@@ -40,6 +41,7 @@ const App = () => {
                                     path="/chatbot"
                                     element={<ChatbotComponent />}
                                 />
+                                <Route path="/adminpage" element={<AdminPage />} />
                                 <Route path="/*" element={<PageNotFound />} />
                             </Routes>
                         </Suspense>
