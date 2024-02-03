@@ -3,6 +3,7 @@ const User = require("../models/User");
 const router = express.Router();
 const fetchuser = require("../middleware/fetchuser");
 const Notes = require("../models/Notes");
+const { body, validationResult } = require("express-validator");
 
 // endpoint --> /api/notes/getallnotes. Login required
 router.get("/getallnotes", fetchuser, async (req, res) => {
