@@ -29,6 +29,8 @@ const App = () => {
                         >
                             <Routes>
                                 <Route path="/" element={<Home />} />
+                                <Route path="/index" element={<Home />} />
+                                <Route path="/index.html" element={<Home />} />
                                 <Route path="/home" element={<Home />} />
                                 <Route path="/about" element={<About />} />
                                 <Route
@@ -41,7 +43,10 @@ const App = () => {
                                     path="/chatbot"
                                     element={<ChatbotComponent />}
                                 />
-                                <Route path="/adminpage" element={<AdminPage />} />
+                                <Route
+                                    path="/adminpage"
+                                    element={<AdminPage />}
+                                />
                                 <Route path="/*" element={<PageNotFound />} />
                             </Routes>
                         </Suspense>
