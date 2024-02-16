@@ -38,7 +38,7 @@ const AdminNote = (props) => {
                 messageApi.error({ content: "Could not update the note" });
                 return;
             }
-            messageApi.destroy()
+            messageApi.destroy();
             messageApi.success({ content: "Information Updated" });
             props.getAllNotesAdmin();
         } catch (error) {
