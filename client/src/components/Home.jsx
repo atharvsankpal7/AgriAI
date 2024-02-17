@@ -1,83 +1,43 @@
 import "../App.css";
 import "../css/backgroundImage.css";
 import NoteContext from "../context/notes/NoteContext";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { message } from "antd";
+
 const Home = () => {
     const noteContext = useContext(NoteContext);
-
-    // From AntDesign
+    const navigate = useNavigate();
     const [messageApi, contextHolder] = message.useMessage();
-
     const url = "http://localhost:5000/api/";
 
     // Destructuring
     const { notes, setNotes } = noteContext;
     const [selectedImage, setSelectedImage] = useState(null);
-    const [imageString, setImageString] = useState(null);
     const [uploadingStatus, setUploadingStatus] = useState(false);
+    const [cameraStream, setCameraStream] = useState(null);
+    const videoRef = useRef(null);
 
-    /**
-     * Handles image input change to convert image to base64 string
-     * Gets image file from input event
-     * Sets state with new image file
-     * Uses FileReader to read image as data URL
-     * Draws image to canvas to get base64 string
-     * Sets state with base64 string representation of image
-     */
-    const handleInputImageChange = (e) => {
-        let newImage = e.target.files[0];
-        setSelectedImage(newImage);
-
-        const reader = new FileReader();
-        try {
-            // Set up the onload event handler for the FileReader
-            reader.onload = function (event) {
-                // Create a new Image object
-                const image = new Image();
-
-                // Set up the onload event handler for the Image
-                image.onload = function () {
-                    // Now that the image has loaded, you can access its dimensions
-
-                    // Create a canvas element
-                    const canvas = document.createElement("canvas");
-                    const ctx = canvas.getContext("2d");
-
-                    // Set the canvas dimensions to match the image
-                    canvas.width = image.width;
-                    canvas.height = image.height;
-
-                    // Draw the image onto the canvas
-                    ctx.drawImage(image, 0, 0);
-
-                    // Get the base64-encoded data URL
-                    const base64String = canvas.toDataURL("image/png");
-
-                    setImageString(base64String);
-                };
-
-                // Set the source of the Image to the data URL obtained from FileReader
-                image.src = event.target.result;
-            };
-            // Read the selected image as a data URL using FileReader
-            reader.readAsDataURL(newImage);
-        } catch (error) {}
-    };
-
-    // if not logged in then navigate to the login page
-    const navigate = useNavigate();
     useEffect(() => {
         if (!localStorage.getItem("token")) {
             navigate("/login");
-            return;
+        } else {
+            getNotes();
         }
-
-        getNotes();
     }, []);
 
-    let getNotes = async () => {
+    useEffect(() => {
+        return () => {
+            // Cleanup: stop media stream when component unmounts
+            if (cameraStream) {
+                cameraStream.getTracks().forEach((track) => {
+                    track.stop();
+                });
+            }
+        };
+    }, [cameraStream]);
+
+    const getNotes = async () => {
         try {
             const response = await fetch(`${url}notes/getallnotes`, {
                 method: "GET",
@@ -86,24 +46,64 @@ const Home = () => {
                 },
             });
 
-            // Check if the response is ok
             if (!response.ok) {
                 return;
             }
 
-            // Parse the JSON data from the response
             const data = await response.json();
-
             setNotes(data);
         } catch (error) {
             console.error("Error fetching notes:", error);
         }
     };
 
-    /**
-     * Uploads the base64-encoded image string to the server.
-     * Shows loading indicator, handles errors, updates notes state on success.
-     */
+    const handleCameraCapture = async () => {
+        setSelectedImage(0);
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: true,
+            });
+            setCameraStream(stream);
+            // Display camera stream in the <video> element
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+            }
+        } catch (error) {
+            console.error("Error accessing camera:", error);
+        }
+    };
+
+    const handleTakePicture = () => {
+        if (videoRef.current) {
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            canvas.width = videoRef.current.videoWidth;
+            canvas.height = videoRef.current.videoHeight;
+            ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+            const base64String = canvas.toDataURL("image/png");
+            setSelectedImage(base64String);
+            // Stop camera stream after capturing the picture
+            if (cameraStream) {
+                cameraStream.getTracks().forEach((track) => {
+                    track.stop();
+                });
+            }
+        }
+    };
+
+    const handleInputImageChange = (e) => {
+        try {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setSelectedImage(reader.result);
+            };
+            reader.readAsDataURL(file);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     const uploadImage = async () => {
         setUploadingStatus(true);
         try {
@@ -119,18 +119,17 @@ const Home = () => {
                     "auth-token": localStorage.getItem("token"),
                 },
                 body: JSON.stringify({
-                    baseImage: imageString,
+                    baseImage: selectedImage,
                 }),
             });
 
-            // Check if the response is ok
             if (!response.ok) {
                 messageApi.destroy();
                 messageApi.error("Error Uploading Image");
                 setUploadingStatus(false);
                 return;
             }
-            // Updating notes
+
             const data = await response.json();
             const currentNotes = notes;
             currentNotes.push(data);
@@ -147,16 +146,12 @@ const Home = () => {
             console.error("Error Uploading notes:", error);
         }
     };
-   
+
     return (
         <div className=" pt-3 pb-3 ">
             {contextHolder}
             <div className="container d-flex flex-column align-items-center justify-content-center text-xxl-center backgroundImage w-75">
-                <h2
-                    className="text-center fs-1 font-monospace pt-3 "
-                    style={{ color: "red" }}
-                >
-                    {" "}
+                <h2 className="h1 text-center py-3 bg-opacity-75 bg-dark w-100" >
                     Welcome back,{" "}
                     {localStorage.getItem("username")
                         ? localStorage.getItem("username")
@@ -173,33 +168,56 @@ const Home = () => {
                             hidden
                             onChange={handleInputImageChange}
                         />
-
                         <label
                             htmlFor="image_upload"
                             className="w-100 h-100 d-flex align-items-center justify-content-center"
                         >
-                            {selectedImage ? (
-                                <img
-                                    src={URL.createObjectURL(selectedImage)}
-                                    alt="selectedImage"
-                                    className="w-100 h-100"
-                                />
-                            ) : (
+                            {selectedImage === null ? (
                                 <img
                                     src="upload.png"
                                     alt="Browse Images"
                                     className="w-50 h-100"
                                 />
+                            ) : selectedImage ? (
+                                <img
+                                    src={selectedImage}
+                                    alt="selectedImage"
+                                    className="w-100 h-100"
+                                />
+                            ) : (
+                                <video
+                                    ref={videoRef}
+                                    autoPlay
+                                    muted
+                                    className="w-100 h-100"
+                                ></video>
                             )}
                         </label>
                     </div>
-                    <button
-                        className="btn btn-outline-dark border-2 w-100 my-3 text-dark-emphasis fs-4"
-                        onClick={uploadImage}
-                        disabled={!selectedImage || uploadingStatus}
-                    >
-                        Upload Image
-                    </button>
+                    <div>
+                        <div>
+                            <button
+                                className="btn btn-outline-dark border-2 my-3 text-dark-emphasis fs-4"
+                                onClick={handleCameraCapture}
+                            >
+                                Open Camera
+                            </button>
+                            <button
+                                className="btn btn-outline-dark border-2 my-3 text-dark-emphasis fs-4"
+                                onClick={handleTakePicture}
+                            >
+                                Capture Image
+                            </button>
+                        </div>
+
+                        <button
+                            className="btn btn-outline-dark border-2 w-100 my-3 text-dark-emphasis fs-4"
+                            onClick={uploadImage}
+                            disabled={!selectedImage || uploadingStatus}
+                        >
+                            Upload Image
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
